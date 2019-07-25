@@ -1,0 +1,6 @@
+__default__:
+  account: "thomg"
+  job-name: "sm.{rule}"
+  max-retry: 1
+  nodes: "1-2"
+  nodelist: "nioo0002.nioo.int,nioo0025.nioo.int"

@@ -1,0 +1,8 @@
+name: py2-env
+channels:
+  - bioconda
+  - defaults
+  - conda-forge
+dependencies:
+  - python=2
+  - checkm-genome

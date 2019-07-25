@@ -1,0 +1,24 @@
+name: py3-env
+channels:
+  - bioconda
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3
+  - pyyaml
+  - natsort
+  - diamond
+  - kaiju
+  - krona
+  - trimmomatic
+  - fastqc
+  - multiqc
+  - quast
+  - spades
+  - pigz
+  - pbzip2
+  - metabat2
+  - bwa
+  - samtools
+  - bioawk
+  - mmseqs2
