@@ -4,3 +4,10 @@ static-files:
   kaiju-db: "/mnt/nfs/bioinfdata/home/NIOO/thomg/db/kaiju/"
   mmseqs-db: "/mnt/nfs/bioinfdata/home/NIOO/thomg/db/swissprot/uprot_sp_mmseqs"
 min-contig-length: 10000
+parts-enabled:
+  qc: false
+  krona: false
+  diamond: false
+  quast: true
+  checkm: false
+  mmseqs: false

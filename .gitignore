@@ -1,6 +1,4 @@
-data/
-results/
-.snakemake/
+*/
 .dmanifest
 *.out
 samples*.yml

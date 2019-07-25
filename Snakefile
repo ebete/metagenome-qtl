@@ -12,24 +12,29 @@ min_version("5.2.0")
 
 # configuration
 configfile: "config.yml"  # global configuration
-configfile: "samples_subset.yml"  # input sample files
+configfile: "samples_p.yml"  # input sample files
 localrules: all, multiqc, checkm_mkroot
 
 
 # project constants
 PROJECT = config["project"]
+DIRECTIONS = config["directions"]
 SAMPLES = config["data"]
-DIRECTIONS = ["R1", "R2"]
 
 # output files
 OUTFILES = list()
-OUTFILES.append("{project}/multiqc/qc_report.html")
-# OUTFILES.append("{project}/krona/{sample}.html")
-# OUTFILES.append("{project}/diamond/{sample}.daa")
-OUTFILES.append("{project}/spades/{sample}/contigs.fasta")
-OUTFILES.append("{project}/quast/")
-OUTFILES.append("{project}/checkm/{sample}/checkm_lineagewf.tsv")
-OUTFILES.append("{project}/mmseqs/{sample}.tsv")
+if config["parts-enabled"]["qc"]:
+    OUTFILES.append("{project}/multiqc/qc_report.html")
+if config["parts-enabled"]["krona"]:
+    OUTFILES.append("{project}/krona/{sample}.html")
+if config["parts-enabled"]["diamond"]:
+    OUTFILES.append("{project}/diamond/{sample}.daa")
+if config["parts-enabled"]["quast"]:
+    OUTFILES.append("{project}/quast/")
+if config["parts-enabled"]["checkm"]:
+    OUTFILES.append("{project}/checkm/{sample}/checkm_lineagewf.tsv")
+if config["parts-enabled"]["mmseqs"]:
+    OUTFILES.append("{project}/mmseqs/{sample}.tsv")
 
 # rule to target all output files
 rule all:
