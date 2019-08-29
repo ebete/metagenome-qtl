@@ -31,10 +31,14 @@ if config["parts-enabled"]["diamond"]:
     OUTFILES.append("{project}/diamond/{sample}.daa")
 if config["parts-enabled"]["quast"]:
     OUTFILES.append("{project}/quast/")
+if config["parts-enabled"]["bwa"]:
+    OUTFILES.append("{project}/samtools/{sample}/alignment.bam")
 if config["parts-enabled"]["checkm"]:
     OUTFILES.append("{project}/checkm/{sample}/checkm_lineagewf.tsv")
+if config["parts-enabled"]["prodigal"]:
+    OUTFILES.append("{project}/prodigal/{sample}.gff")
 if config["parts-enabled"]["mmseqs"]:
-    OUTFILES.append("{project}/mmseqs/{sample}.tsv")
+    OUTFILES.append("{project}/mmseqs/{sample}/results.tsv")
 
 # rule to target all output files
 rule all:
@@ -271,11 +275,30 @@ rule checkm:
 #
 # CONTIG ALIGNMENT
 #
-rule mmseqs:
+rule prodigal:
     input:
         rules.spades.output.contigs
     output:
-        "{project}/mmseqs/{sample}.tsv"
+        nucl = "{project}/prodigal/{sample}.fna",
+        prot = "{project}/prodigal/{sample}.faa",
+        gff = "{project}/prodigal/{sample}.gff"
+    threads: 1
+    resources:
+        mem_mb = 500
+    conda:
+        "py3_env.yml"
+    params:
+        min_length = config["min-contig-length"]
+    shell:
+        'bioawk -c fastx \'length($seq)<{params.min_length} {{exit 0;}} {{print ">" $name,$comment "\\n" $seq;}}\' "{input}" '
+        '| prodigal -q -f gff -p meta -d "{output.nucl}" -a "{output.prot}" -o "{output.gff}"'
+
+
+rule mmseqs:
+    input:
+        rules.prodigal.output.prot
+    output:
+        "{project}/mmseqs/{sample}/results.tsv"
     threads: 32
     resources:
         mem_mb = 100000
@@ -283,6 +306,24 @@ rule mmseqs:
         "py3_env.yml"
     params:
         db = config["static-files"]["mmseqs-db"],
-        tmp_dir = "/tmp"
+        tmp_dir = "/tmp",
+        out_fmt = "query,target,pident,alnlen,mismatch,qstart,qend,tstart,tend,evalue,bits,qcov,tcov"
+        # Query name
+        # Target name
+        # Percentage identity
+        # Alignment length
+        # Mismatches
+        # Query start position
+        # Query end position
+        # Target start position
+        # Target end position
+        # Expect value
+        # Bit score
+        # Query coverage
+        # Target coverage
     shell:
-        'mmseqs easy-search --threads {threads} --search-type 2 --format-mode 0 -v 2 "{input}" "{params.db}" "{output}" "{params.tmp_dir}"'
+        'mmseqs easy-search --threads {threads} --search-type 1 --format-mode 0 --format-output "{params.out_fmt}" --sort-results 1 -v 2 "{input}" "{params.db}" "{output}" "{params.tmp_dir}"'
+        # 'mmseqs createdb --dbtype 1 -v 2 --compressed 1 "{input}" "{output.query_db}" '
+#        '&& mmseqs createindex --threads {threads} --search-type 1 --compressed 1 "{output.query_db}" "{params.tmp_dir}" '
+#         '&& mmseqs search --threads {threads} --search-type 1 --sort-results 1 --compressed 1 -v 2 "{output.query_db}" "{params.db}" "{output.results_db}" "{params.tmp_dir}" '
+#         '&& mmseqs convertalis --threads {threads} --format-mode 0 --format-output "{params.out_fmt}" -v 2 "{output.query_db}" "{params.db}" "{output.results_db}" "{output.alignment}"'

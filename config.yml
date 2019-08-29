@@ -8,6 +8,8 @@ parts-enabled:
   qc: false
   krona: false
   diamond: false
-  quast: true
+  quast: false
+  bwa: false
   checkm: false
+  prodigal: true
   mmseqs: false

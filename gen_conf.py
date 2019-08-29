@@ -8,6 +8,8 @@ import yaml
 def main(args):
     data_loc = Path(args[0])
     structure = {
+        "project": "project_name",
+        "directions": ["R1", "R2"],
         "data": dict()
     }
 
