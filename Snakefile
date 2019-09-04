@@ -12,7 +12,7 @@ min_version("5.2.0")
 
 # configuration
 configfile: "config.yml"  # global configuration
-configfile: "samples_p.yml"  # input sample files
+configfile: "samples_f8.yml"  # input sample files
 localrules: all, multiqc, checkm_mkroot
 
 
@@ -39,6 +39,7 @@ if config["parts-enabled"]["prodigal"]:
     OUTFILES.append("{project}/prodigal/{sample}.gff")
 if config["parts-enabled"]["mmseqs"]:
     OUTFILES.append("{project}/mmseqs/{sample}/results.tsv")
+OUTFILES.append("{project}/mg_pheno/{sample}/alignment.bam")
 
 # rule to target all output files
 rule all:
@@ -293,6 +294,29 @@ rule prodigal:
         'bioawk -c fastx \'length($seq)<{params.min_length} {{exit 0;}} {{print ">" $name,$comment "\\n" $seq;}}\' "{input}" '
         '| prodigal -q -f gff -p meta -d "{output.nucl}" -a "{output.prot}" -o "{output.gff}"'
 
+
+rule make_ril_phenotype:
+    input:
+        fwd = lambda wildcards: config["data"][wildcards.sample]["R1"],
+        rev = lambda wildcards: config["data"][wildcards.sample]["R2"]
+    output:
+        bam = "{project}/mg_pheno/{sample}/alignment.bam",
+        bed = "{project}/mg_pheno/{sample}/depth.bed",
+        gene_cov = "{project}/mg_pheno/{sample}/coverage.csv",
+    threads: 16
+    resources:
+        mem_mb = lambda wildcards, threads: max(threads * 2000, 5000)
+    conda:
+        "py3_env.yml"
+    params:
+        index = "results_p/prodigal/db/all_bwa"
+    shell:
+        'bwa mem -t {threads} "{params.index}" "{input.fwd}" "{input.rev}" '
+        '| samtools view --threads 1 -b - '
+        '| samtools sort --threads {threads} --output-fmt bam -o "{output.bam}" - '
+        '&& samtools index -b -@ {threads} "{output.bam}" '
+        '&& bedtools genomecov -bga -ibam "{output.bam}" > "{output.bed}" '
+        '&& python3 bed_stats.py "{output.bed}" > "{output.gene_cov}"'
 
 rule mmseqs:
     input:

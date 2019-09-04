@@ -11,5 +11,5 @@ parts-enabled:
   quast: false
   bwa: false
   checkm: false
-  prodigal: true
+  prodigal: false
   mmseqs: false
