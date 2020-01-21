@@ -9,7 +9,7 @@ from pathlib import Path
 def get_coverage_per_gene(bed_file):
     logging.info("Reading alignment depths from %s ...", bed_file.name)
 
-    print("orf", "avg_depth", "coverage", sep="\t")
+    print("orf", "length", "total_mapped", "avg_depth", "coverage", sep="\t")
 
     with bed_file.open("r", newline="") as f:
         handle = csv.reader(f, delimiter="\t")
@@ -27,7 +27,7 @@ def get_coverage_per_gene(bed_file):
 
             if cur_gene != last_gene:
                 if total > 0:
-                    print(last_gene, f"{gene_nucl / total:.1f}", f"{covered / total:.5f}", sep="\t")
+                    print(last_gene, total, gene_nucl, f"{gene_nucl / total:.1f}", f"{covered / total:.5f}", sep="\t")
                 covered = 0
                 total = 0
                 gene_nucl = 0
