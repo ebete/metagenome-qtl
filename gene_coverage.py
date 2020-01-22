@@ -73,7 +73,7 @@ def per_orf_statistics(orf_regions, depths):
             if total_nucleotides != 0:
                 avg_depth = total_nucleotides / orf_size
             print(
-                bed_file.name, orf_id, orf_size, total_nucleotides, f"{avg_depth:.2f}", f"{covered / orf_size:.2f}",
+                bed_file.name, orf_id, orf_size, total_nucleotides, f"{avg_depth:.5f}", f"{covered / orf_size:.5f}",
                 sep="\t"
             )
 
