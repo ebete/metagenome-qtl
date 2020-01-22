@@ -49,7 +49,7 @@ def get_depths(bed_fname, contig_ids):
 def per_orf_statistics(orf_regions, depths):
     logging.info("Writing average depth per ORF ...")
 
-    print("sample_id", "orf_id", "length", "total_mapped", "avg_depth", sep="\t")
+    print("sample_id", "orf_id", "length", "total_mapped", "avg_depth", "coverage", sep="\t")
 
     for contig_id in orf_regions:
         depth = depths[contig_id]
@@ -57,18 +57,25 @@ def per_orf_statistics(orf_regions, depths):
         depth_start, depth_end, depth_val = depth[depth_idx]
         for orf_start, orf_end, orf_id in orf_regions[contig_id]:
             total_nucleotides = 0
+            covered = 0
             while orf_start > depth_end and depth_idx < len(depth):
                 depth_idx += 1
                 depth_start, depth_end, depth_val = depth[depth_idx]
             while orf_end > depth_start and depth_idx < len(depth) - 1:
                 overlap = min(orf_end, depth_end) - max(orf_start, depth_start)
-                total_nucleotides += depth_val * overlap
+                if depth_val > 0:
+                    total_nucleotides += depth_val * overlap
+                    covered += overlap
                 depth_idx += 1
                 depth_start, depth_end, depth_val = depth[depth_idx]
             avg_depth = 0
+            orf_size = orf_end - orf_start
             if total_nucleotides != 0:
-                avg_depth = total_nucleotides / (orf_end - orf_start)
-            print(bed_file.name, orf_id, orf_end - orf_start, total_nucleotides, f"{avg_depth:.2f}", sep="\t")
+                avg_depth = total_nucleotides / orf_size
+            print(
+                bed_file.name, orf_id, orf_size, total_nucleotides, f"{avg_depth:.2f}", f"{covered / orf_size:.2f}",
+                sep="\t"
+            )
 
 
 if __name__ == "__main__":
