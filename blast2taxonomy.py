@@ -38,4 +38,6 @@ if __name__ == "__main__":
     parser.add_argument("nxml_file", metavar="NXML", help="NCBI-XML BLAST results file.")
     args = parser.parse_args()
 
-    read_nxml(Path(args.nxml_file))
+    nxml_file = Path(args.nxml_file)
+
+    read_nxml(nxml_file)

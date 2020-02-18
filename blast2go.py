@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import logging
 import lzma
 import pickle
@@ -28,5 +29,16 @@ def read_nxml(xml_path, lookup_db_path):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-    read_nxml(Path(sys.argv[2]), Path(sys.argv[1]))
+    logging.basicConfig(level=logging.INFO, format="[%(asctime)s] %(message)s")
+
+    # get command-line arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input_lookup", help="ID conversion file generated with "
+            "make_uniprot_idmapping_db.py", metavar="LOOKUP_DB")
+    parser.add_argument("nxml_file", help="NCBI-XML BLAST results file.", metavar="NXML")
+    args = parser.parse_args()
+
+    input_lookup = Path(args.input_lookup)
+    nxml_file = Path(args.nxml_file)
+
+    read_nxml(nxml_file, input_lookup)
